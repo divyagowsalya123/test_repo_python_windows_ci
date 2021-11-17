@@ -1,0 +1,75 @@
+# Install Python dependencies
+# Lint with flake8, mypy, and isort. Fails on any errors.
+# Test with pytest
+
+name: Python - Windows - CI
+
+on:
+  push:
+    # main = default top-level branch name, master = deprecated name
+    # run CI on every branch push except top-level
+    branches-ignore: [master, main]
+  pull_request:
+    branches: [master, main]
+  # allow running workflow manually
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.x
+      uses: actions/setup-python@v2
+      with:
+        # pulls latest version of python, alternatively specify exact version (i.e. 3.8 -> no quotes)
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install flake8 mypy pytest isort wheel
+        If (Test-Path requirements.txt) { pip install -r requirements.txt }
+    - name: Lint with flake8
+      run: |
+        # fail if there are any flake8 errors
+        flake8 . --count --max-complexity=15 --max-line-length=127 --statistics
+    - name: Lint with mypy
+      run: |
+        # no recursive flag for mypy, so have to manually find all .py files in dir using PowerShell
+        # mypy doesn't return error code, so have to manually check for 'error' in return string
+        # --ignore-missing-imports: ignore all missing imports
+        # --disallow-untyped-defs: function definition without type annotations
+        # --disallow-untyped-calls: function with type annotations calls a function defined without annotations
+        # --disallow-incomplete-defs: partly annotated function definition
+        # --show-error-codes:  add an error code to error messages
+        # --raise-exceptions: raise exception on fatal error
+        $mypy_errors = $FALSE;
+        Get-ChildItem . -Filter "*.py" -Recurse | `
+            foreach {
+                $mypy_error = (mypy $_.FullName `
+                    --ignore-missing-imports `
+                    --disallow-untyped-defs `
+                    --disallow-incomplete-defs `
+                    --show-error-codes `
+                    --raise-exceptions
+                )
+                if ($mypy_error -like '*error*'){
+                    $mypy_errors = $TRUE;
+                    echo $mypy_error;
+                }
+        }
+        if ($mypy_errors) { exit 1}
+    - name: Lint with isort
+      run: |
+        # isort doesn't return error code, so have to manually check for 'import' or 'from' in return string
+        # --diff: Prints a diff of all the changes isort would make to a file
+        $isort_errors = isort . --diff;
+        echo $isort_errors;
+        if (($isort_errors -like '*from*') -or ($isort_errors -like '*import*')) {exit 1}
+    - name: Test with pytest
+      run: |
+        # dont run pytest unless tests dir exists
+        If (Test-Path tests\) { python -m pytest}
