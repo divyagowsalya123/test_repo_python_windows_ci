@@ -61,15 +61,15 @@ jobs:
                     echo $mypy_error;
                 }
         }
-        if ($mypy_errors) { exit 1}
+        if ($mypy_errors) { exit 1 }
     - name: Lint with isort
       run: |
         # isort doesn't return error code, so have to manually check for 'import' or 'from' in return string
         # --diff: Prints a diff of all the changes isort would make to a file
         $isort_errors = isort . --diff;
         echo $isort_errors;
-        if (($isort_errors -like '*from*') -or ($isort_errors -like '*import*')) {exit 1}
+        if (($isort_errors -like '*from*') -or ($isort_errors -like '*import*')) { exit 1 }
     - name: Test with pytest
       run: |
         # dont run pytest unless tests dir exists
-        If (Test-Path tests\) { python -m pytest}
+        If (Test-Path tests\) { python -m pytest }
