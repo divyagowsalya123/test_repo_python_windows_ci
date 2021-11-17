@@ -1,7 +1,8 @@
 import math
+from typing import Union
 
 
-def sub(a: float, b: float) -> int:
+def sub(a: Union[int, float], b: Union[int, float]) -> int:
     return math.floor(a - b)
 
 
