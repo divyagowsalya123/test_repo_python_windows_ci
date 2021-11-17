@@ -1,7 +1,5 @@
 import math
 from typing import Union
-
-
 def add(a: Union[int, float], b: Union[int, float]) -> int:
     return math.floor(a + b)
 
