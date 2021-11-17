@@ -1,7 +1,7 @@
 import math
 
 
-def sub(a: int, b: int) -> int:
+def sub(a: float, b: float) -> int:
     return math.floor(a - b)
 
 
