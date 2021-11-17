@@ -1,12 +1,11 @@
 import math
-import os
 
 
-def add(a, b) -> int:
+def add(a: int, b: int) -> int:
     return math.floor(a + b)
 
 
-def to_sentence(s) -> str:
+def to_sentence(s: str) -> str:
     s = s.capitalize()
 
     if s.endswith('.'):
